@@ -2,7 +2,8 @@
 
 namespace EventSourcingPoc.API.Events
 {
-    public record GuaranteeCreated(
+
+    public record GuaranteeApplicationSubmitted(
         Guid Id,
         string TenderId,
         string Gloss,
@@ -14,14 +15,7 @@ namespace EventSourcingPoc.API.Events
         Money Cost
     );
 
-    public record GuranteePaid(
-        Money PaidCost
-    );
+    public record GuaranteeEndorsementRequested(
 
-    public record GuaranteeIssued(
-        DateTime IssueDate,
-        List<GuaranteeDocument> Documents
     );
-
-    public record GuaranteeGlossCorrected(string Gloss);
 }

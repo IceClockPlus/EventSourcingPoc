@@ -1,5 +1,7 @@
-﻿using System.Runtime.InteropServices;
-using static EventSourcingPoc.API.Events.GuaranteeEvents;
+﻿using EventSourcingPoc.API.Events;
+using System.Globalization;
+using System.Reflection;
+using System.Resources;
 
 namespace EventSourcingPoc.API.Domain
 {
@@ -7,13 +9,14 @@ namespace EventSourcingPoc.API.Domain
     {
         public Guid Id { get; private set; }
         public string? TenderId { get; private set; }
+        public string Gloss { get; private set; } = string.Empty;
         public DateRange CurrentDateCoverage { get; private set; }
         public Money CurrentAmountCoverage { get; private set; }
         public GuaranteePurpose Purpose { get; private set; }
         public GuaranteeStatus Status {  get; private set; }
-        public Guid CustomerId { get; private set; }
-        public Guid BeneficiaryId { get; private set; }
-        public string? BrokerId { get; private set; }
+        public LegalParty Supplier { get; private set; }
+        public LegalParty Beneficiary { get; private set; }
+
         private readonly List<GuaranteeEndorsement> _endorsement = new();
         public IReadOnlyList<GuaranteeEndorsement> Endorsements => _endorsement.AsReadOnly();
 
@@ -34,11 +37,11 @@ namespace EventSourcingPoc.API.Domain
             }
         }
 
-        public void ConfirmPrice(Money money, int endorsementSequence)
-        {
-            var @event = new GuaranteePriceConfirmed(endorsementSequence, money);
-            RaiseEvent(@event);
-        }
+        //public void ConfirmPrice(Money money, int endorsementSequence)
+        //{
+        //    var @event = new GuaranteePriceConfirmed(endorsementSequence, money);
+        //    RaiseEvent(@event);
+        //}
 
         public Guarantee(){}
 
@@ -47,19 +50,20 @@ namespace EventSourcingPoc.API.Domain
             Id = @event.Id;
             TenderId = @event.TenderId;
             Purpose = @event.Purpose;
-            CustomerId = @event.CustomerId;
-            BeneficiaryId = @event.BeneficiaryId;
             Status = GuaranteeStatus.Draft;
-            var initialEndorsement = new GuaranteeEndorsement(
-                Sequence: 0,
-                EndorsementNumber: 0,
-                Cost: @event.Cost,
-                CurrentAmountCoverage = @event.InitialAmountCoverage,
-                CurrentDateCoverage = @event.InitialDateCoverage,
-                IssuedAt: DateTime.UtcNow,
-                Documents: []
-            );
-            _endorsement.Add(initialEndorsement);
+            Supplier = @event.Supplier;
+            Beneficiary = @event.Beneficiary;
+            Gloss = @event.Gloss;
+            //var initialEndorsement = new GuaranteeEndorsement(
+            //    Sequence: 0,
+            //    EndorsementNumber: 0,
+            //    Cost: @event.Cost,
+            //    CurrentAmountCoverage = @event.InitialAmountCoverage,
+            //    CurrentDateCoverage = @event.InitialDateCoverage,
+            //    IssuedAt: DateTime.UtcNow,
+            //    Documents: []
+            //);
+            //_endorsement.Add(initialEndorsement);
             UpdateCurrentState(initialEndorsement);
         }
 
@@ -82,6 +86,8 @@ namespace EventSourcingPoc.API.Domain
         }
     }
 
+    public record GuaranteeNumber(long Number, string Code);
+
     public record GuaranteeEndorsement(
         int Sequence,
         int EndorsementNumber,
@@ -92,9 +98,27 @@ namespace EventSourcingPoc.API.Domain
         IEnumerable<GuaranteeDocument> Documents
     );
 
+    public record LegalParty(string TaxId, string Name, Address Address);
+    public record Address(string Street, string Location, string Area);
+
     public record GuaranteeDocument(string Type, string Uri);
 
-    public record Money(decimal Amount, Currency Currency);
+    public record Money(decimal Amount, Currency Currency)
+    {
+        public string ToString(string culture = "es")
+        {
+            CultureInfo info = new(culture);
+            string formattedAmount = Amount.ToString("N", info);
+            // Mostrar el monto de acuerdo a su moneda
+            return Currency switch
+            {
+                Currency.CLP => $"{formattedAmount} CLP",
+                Currency.UF => $"{formattedAmount} UF",
+                Currency.USD => $"{formattedAmount} USD",
+                _ => throw new ArgumentOutOfRangeException(nameof(Currency), $"Not expected currency value: {Currency}"),
+            };
+        }
+    };
     public record DateRange(DateTime Start, DateTime End);
 
     public enum Currency
@@ -116,7 +140,7 @@ namespace EventSourcingPoc.API.Domain
     {
         BidGuarantee,
         PerformanceGuarantee,
-        AdvancePayment
+        AdvancePayment       
     }
 
     public enum GuaranteeStatus
@@ -127,5 +151,20 @@ namespace EventSourcingPoc.API.Domain
         Issued = 3,
         Finalized = 4,
         Cancelled = 5,
+    }
+
+    public static class GuaranteeExtensionMethods
+    {
+        private static readonly ResourceManager _resourceManager = new("EventSourcingPoc.API.Resources.GuaranteeResources", Assembly.GetExecutingAssembly());
+        public static string EnumValue(this GuaranteePurpose purpose, string culture = "es")
+        {
+            //Crear cultura
+            string llaveRecurso = purpose.ToString();
+            CultureInfo cultureInfo = new CultureInfo(culture);
+
+            // Obtener el nombre de la finalidad de la garantía desde el recurso utilizando la cultura especificada
+            var nombreFinalidad = _resourceManager.GetString(llaveRecurso, cultureInfo);
+            return nombreFinalidad ?? throw new ArgumentNullException($"No se encontró el recurso para la finalidad de garantía: {purpose} con cultura: {culture}");
+        }
     }
 }
