@@ -64,7 +64,7 @@ namespace EventSourcingPoc.API.Domain
             //    Documents: []
             //);
             //_endorsement.Add(initialEndorsement);
-            UpdateCurrentState(initialEndorsement);
+            //UpdateCurrentState(initialEndorsement);
         }
 
         public void Apply(GuaranteePriceConfirmed @event)

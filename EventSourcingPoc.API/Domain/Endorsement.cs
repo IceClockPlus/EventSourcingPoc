@@ -5,10 +5,7 @@
     /// </summary>
     public class Endorsement
     {
-        public Guid Id { get; set; }
-        public DateRange DateCoverage { get; set; }
-        public Money Amount { get; set; }
-        public string? TenderId { get; set; }
-        public string Gloss { get; set; }
+        public Guid Id { get; private set; }
+        public Guid GuaranteeId { get; private set; }
     }
 }

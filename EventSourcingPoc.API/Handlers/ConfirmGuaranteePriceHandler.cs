@@ -17,7 +17,7 @@ namespace EventSourcingPoc.API.Handlers
             if (guarantee == null) throw new ArgumentNullException();
             var lastEndorsement = guarantee.Endorsements.OrderBy(e => e.Sequence).LastOrDefault();
             Money money = new(command.Cost, lastEndorsement!.Cost.Currency);
-            guarantee.ConfirmPrice(money, lastEndorsement.Sequence);
+            //guarantee.ConfirmPrice(money, lastEndorsement.Sequence);
 
             var uncommittedEvents = guarantee.GetUncommittedEvents();
             _session.Events.Append(command.GuaranteeId, uncommittedEvents);
