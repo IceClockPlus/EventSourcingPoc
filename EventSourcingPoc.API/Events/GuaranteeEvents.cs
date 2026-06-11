@@ -2,7 +2,7 @@
 
 namespace EventSourcingPoc.API.Events
 {
-    public record GuaranteeCreated(
+    public record GuaranteeRequested(
         Guid Id,
         string TenderId,
         string Gloss,
@@ -11,17 +11,15 @@ namespace EventSourcingPoc.API.Events
         LegalParty Beneficiary,
         DateRange InitialDateCoverage,
         Money InitialAmountCoverage,
-        Money Cost
+        Money Price
     );
 
-    public record GuranteePaid(
-        Money PaidCost
+    public record GuaranteePaid(
+        Money PaidPrice
     );
 
     public record GuaranteeIssued(
-        DateTime IssueDate,
-        List<GuaranteeDocument> Documents
+        DateTime IssueDate
     );
 
-    public record GuaranteeGlossCorrected(string Gloss);
 }

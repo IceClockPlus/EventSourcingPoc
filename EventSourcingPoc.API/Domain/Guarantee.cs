@@ -1,4 +1,5 @@
 ﻿using EventSourcingPoc.API.Events;
+using ImTools;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -16,9 +17,10 @@ namespace EventSourcingPoc.API.Domain
         public GuaranteeStatus Status {  get; private set; }
         public LegalParty Supplier { get; private set; }
         public LegalParty Beneficiary { get; private set; }
+        public Insurance Insurance { get; private set; }
 
-        private readonly List<GuaranteeEndorsement> _endorsement = new();
-        public IReadOnlyList<GuaranteeEndorsement> Endorsements => _endorsement.AsReadOnly();
+        private List<GuaranteeDocument> _documents = new();
+        public IReadOnlyCollection<GuaranteeDocument> Documents => _documents.AsReadOnly();
 
 
         private readonly List<object> _uncommittedEvents = new();
@@ -30,22 +32,16 @@ namespace EventSourcingPoc.API.Domain
             _uncommittedEvents.Add(@event);
             switch (@event)
             {
-                case GuaranteeCreated e: Apply(e); break;
-                case GuaranteePriceConfirmed e: Apply(e); break;
+                case GuaranteeRequested e: Apply(e); break;
+                //case GuaranteePriceConfirmed e: Apply(e); break;
                 default:
                     throw new InvalidOperationException();
             }
         }
 
-        //public void ConfirmPrice(Money money, int endorsementSequence)
-        //{
-        //    var @event = new GuaranteePriceConfirmed(endorsementSequence, money);
-        //    RaiseEvent(@event);
-        //}
+        public Guarantee() { }
 
-        public Guarantee(){}
-
-        public void Apply(GuaranteeCreated @event)
+        public void Apply(GuaranteeRequested @event)
         {
             Id = @event.Id;
             TenderId = @event.TenderId;
@@ -54,54 +50,22 @@ namespace EventSourcingPoc.API.Domain
             Supplier = @event.Supplier;
             Beneficiary = @event.Beneficiary;
             Gloss = @event.Gloss;
-            //var initialEndorsement = new GuaranteeEndorsement(
-            //    Sequence: 0,
-            //    EndorsementNumber: 0,
-            //    Cost: @event.Cost,
-            //    CurrentAmountCoverage = @event.InitialAmountCoverage,
-            //    CurrentDateCoverage = @event.InitialDateCoverage,
-            //    IssuedAt: DateTime.UtcNow,
-            //    Documents: []
-            //);
-            //_endorsement.Add(initialEndorsement);
-            //UpdateCurrentState(initialEndorsement);
+            CurrentAmountCoverage = @event.InitialAmountCoverage;
         }
 
-        public void Apply(GuaranteePriceConfirmed @event)
-        {
-            // Apply change on the sequence endorsement selected
-            var idx = _endorsement.FindIndex(e => e.Sequence == @event.Sequence);
-            if( idx < 0 )
-                throw new ArgumentNullException("Endoso de garantia no encontrado");
-            var endorsement = _endorsement[idx];
 
-            var updatedEndorsement = endorsement with { Cost =  @event.Cost };
-            _endorsement[idx] = updatedEndorsement;
-        }
-
-        private void UpdateCurrentState(GuaranteeEndorsement endorsement)
+        public void Apply(GuaranteeIssued @event)
         {
-            CurrentDateCoverage = endorsement.DateCoverage;
-            CurrentAmountCoverage = endorsement.AmountCoverage;
+            Status = GuaranteeStatus.Issued;
         }
     }
 
     public record GuaranteeNumber(long Number, string Code);
 
-    public record GuaranteeEndorsement(
-        int Sequence,
-        int EndorsementNumber,
-        Money Cost,
-        Money AmountCoverage,
-        DateRange DateCoverage,
-        DateTime IssuedAt,
-        IEnumerable<GuaranteeDocument> Documents
-    );
+    public record GuaranteeDocument(string Type, string Uri);
 
     public record LegalParty(string TaxId, string Name, Address Address);
     public record Address(string Street, string Location, string Area);
-
-    public record GuaranteeDocument(string Type, string Uri);
 
     public record Money(decimal Amount, Currency Currency)
     {
@@ -126,6 +90,11 @@ namespace EventSourcingPoc.API.Domain
         CLP = 0,
         UF = 1,
         USD = 2
+    }
+
+    public enum Insurance
+    {
+        Internal = 0
     }
 
     public enum EndorsementType

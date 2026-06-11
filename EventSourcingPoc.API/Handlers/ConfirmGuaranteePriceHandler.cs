@@ -15,8 +15,6 @@ namespace EventSourcingPoc.API.Handlers
         {
             var guarantee = await _session.Events.AggregateStreamAsync<Guarantee>(command.GuaranteeId, token: cancellationToken);
             if (guarantee == null) throw new ArgumentNullException();
-            var lastEndorsement = guarantee.Endorsements.OrderBy(e => e.Sequence).LastOrDefault();
-            Money money = new(command.Cost, lastEndorsement!.Cost.Currency);
             //guarantee.ConfirmPrice(money, lastEndorsement.Sequence);
 
             var uncommittedEvents = guarantee.GetUncommittedEvents();

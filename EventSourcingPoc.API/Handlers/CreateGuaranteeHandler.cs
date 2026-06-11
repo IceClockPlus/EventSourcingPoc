@@ -1,11 +1,12 @@
 ﻿using EventSourcingPoc.API.Domain;
+using EventSourcingPoc.API.Events;
 using Marten;
-using static EventSourcingPoc.API.Events.GuaranteeEvents;
 
 namespace EventSourcingPoc.API.Handlers
 {
     public record CreateGuaranteeCommand(
         string TenderId,
+        string Gloss,
         DateTime Start,
         DateTime End,
         decimal Amount,
@@ -26,15 +27,16 @@ namespace EventSourcingPoc.API.Handlers
         public async Task Handle(CreateGuaranteeCommand command, CancellationToken cancellationToken)
         {
             Guid id = Guid.CreateVersion7();
-            GuaranteeCreated @event = new GuaranteeCreated(
+            GuaranteeRequested @event = new GuaranteeRequested(
                 Id: id,
                 TenderId: command.TenderId,
                 InitialDateCoverage: new DateRange(command.Start, command.End),
                 InitialAmountCoverage: new Money(command.Amount, Currency.CLP),
-                Cost: new Money(command.Cost, Currency.CLP),
+                Price: new Money(command.Cost, Currency.CLP),
                 Purpose: command.Purpose,
-                CustomerId: command.CustomerId,
-                BeneficiaryId: command.BeneficiaryId
+                Supplier: new LegalParty("111111111", "Cliente", new Address("Calle 2", "Santiago", "Metropolitana")),
+                Beneficiary: new LegalParty("444444444", "Mandante", new Address("Calle 10", "Santiago", "Metropolitana")),
+                Gloss: command.Gloss
             );
             _session.Events.Append(id, @event);
             await _session.SaveChangesAsync(cancellationToken);
