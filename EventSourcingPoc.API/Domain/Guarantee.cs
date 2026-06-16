@@ -27,10 +27,6 @@ namespace EventSourcingPoc.API.Domain
         public LegalParty Beneficiary { get; private set; }
         public Insurance Insurance { get; private set; }
 
-        private List<GuaranteeDocument> _documents = new();
-        public IReadOnlyCollection<GuaranteeDocument> Documents => _documents.AsReadOnly();
-
-
         private readonly List<object> _uncommittedEvents = new();
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
         public void ClearUncommittedEvents() => _uncommittedEvents.Clear();
@@ -71,7 +67,6 @@ namespace EventSourcingPoc.API.Domain
     public record GuaranteeInformation(string? TenderId, string Gloss, string? EndorsementNumber);
     public record GuaranteeNumber(long Number, string Code);
 
-    public record GuaranteeDocument(string Type, string Uri);
 
     public record LegalParty(string TaxId, string Name, Address Address);
     public record Address(string Street, string Location, string Area);
