@@ -120,10 +120,22 @@
   <data name="AdvancePayment" xml:space="preserve">
     <value>Anticipo</value>
   </data>
-  <data name="BidGuarantee" xml:space="preserve">
+  <data name="BidBond" xml:space="preserve">
     <value>Seriedad de oferta</value>
+  </data>
+  <data name="DefectLiabilityBond" xml:space="preserve">
+    <value>Correcta Ejecución</value>
+  </data>
+  <data name="MaintenanceAndOperationalPerformanceBond" xml:space="preserve">
+    <value>Correcta Ejecución y Buen Comportamiento</value>
+  </data>
+  <data name="PerformanceAndDefectLiabilityBond" xml:space="preserve">
+    <value>Fiel Cumplimiento y Correcta Ejecución</value>
   </data>
   <data name="PerformanceGuarantee" xml:space="preserve">
     <value>Fiel Cumplimiento</value>
+  </data>
+  <data name="RetentionMoneyBond" xml:space="preserve">
+    <value>Canje de retenciones</value>
   </data>
 </root>

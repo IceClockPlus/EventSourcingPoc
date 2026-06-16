@@ -26,7 +26,7 @@
         public LegalParty Customer { get; private set; }
         public LegalParty Beneficiary { get; private set; }
         public string Gloss { get; private set; }
-        public GuaranteePurpose Purpose { get; private set; }
+        public GuaranteeBond Purpose { get; private set; }
     }
 
     /// <summary>

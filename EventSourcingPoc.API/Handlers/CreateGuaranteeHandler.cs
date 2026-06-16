@@ -13,7 +13,7 @@ namespace EventSourcingPoc.API.Handlers
         decimal Cost,
         Guid CustomerId,
         Guid BeneficiaryId,
-        GuaranteePurpose Purpose
+        GuaranteeBond Purpose
     );
     
     public class CreateGuaranteeHandler

@@ -6,7 +6,7 @@ namespace EventSourcingPoc.API.Events
         Guid Id,
         string TenderId,
         string Gloss,
-        GuaranteePurpose Purpose,
+        GuaranteeBond Bond,
         LegalParty Supplier,
         LegalParty Beneficiary,
         DateRange InitialDateCoverage,

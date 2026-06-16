@@ -13,9 +13,17 @@ namespace EventSourcingPoc.API.Domain
         public string Gloss { get; private set; } = string.Empty;
         public DateRange CurrentDateCoverage { get; private set; }
         public Money CurrentAmountCoverage { get; private set; }
-        public GuaranteePurpose Purpose { get; private set; }
+        public GuaranteeBond Bond { get; private set; }
         public GuaranteeStatus Status {  get; private set; }
+
+        /// <summary>
+        /// En este contexto, el "Proveedor" se refiere a la parte que solicita la garantía, es decir, la empresa o individuo que necesita la garantía para respaldar su participación en un proceso de licitación o contrato. El "Beneficiario" es la parte que se beneficia de la garantía, generalmente la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
+        /// </summary>
         public LegalParty Supplier { get; private set; }
+
+        /// <summary>
+        /// En este contexto, el "Beneficiario" se refiere a la parte que se beneficia de la garantía, es decir, la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. El beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
+        /// </summary>
         public LegalParty Beneficiary { get; private set; }
         public Insurance Insurance { get; private set; }
 
@@ -45,7 +53,7 @@ namespace EventSourcingPoc.API.Domain
         {
             Id = @event.Id;
             TenderId = @event.TenderId;
-            Purpose = @event.Purpose;
+            Bond = @event.Bond;
             Status = GuaranteeStatus.Draft;
             Supplier = @event.Supplier;
             Beneficiary = @event.Beneficiary;
@@ -60,6 +68,7 @@ namespace EventSourcingPoc.API.Domain
         }
     }
 
+    public record GuaranteeInformation(string? TenderId, string Gloss, string? EndorsementNumber);
     public record GuaranteeNumber(long Number, string Code);
 
     public record GuaranteeDocument(string Type, string Uri);
@@ -105,11 +114,15 @@ namespace EventSourcingPoc.API.Domain
         Correction = 3,
     }
 
-    public enum GuaranteePurpose
+    public enum GuaranteeBond
     {
-        BidGuarantee,
-        PerformanceGuarantee,
-        AdvancePayment       
+        BidBond = 0,
+        PerformanceBond = 1,
+        DefectLiabilityBond = 2,
+        PerformanceAndDefectLiabilityBond = 3,
+        MaintenanceAndOperationalPerformanceBond = 4,
+        AdvancePaymentBond = 5,
+        RetentionMoneyBond = 6         
     }
 
     public enum GuaranteeStatus
@@ -125,7 +138,7 @@ namespace EventSourcingPoc.API.Domain
     public static class GuaranteeExtensionMethods
     {
         private static readonly ResourceManager _resourceManager = new("EventSourcingPoc.API.Resources.GuaranteeResources", Assembly.GetExecutingAssembly());
-        public static string EnumValue(this GuaranteePurpose purpose, string culture = "es")
+        public static string EnumValue(this GuaranteeBond purpose, string culture = "es")
         {
             //Crear cultura
             string llaveRecurso = purpose.ToString();
