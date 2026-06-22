@@ -11,9 +11,17 @@ namespace EventSourcingPoc.API.Handlers
         DateTime End,
         decimal Amount,
         decimal Cost,
-        Guid CustomerId,
-        Guid BeneficiaryId,
+        LegalPartyCreateGuaranteeCommand Supplier,
+        LegalPartyCreateGuaranteeCommand Beneficiary,
         GuaranteeBond Bond
+    );
+
+    public record LegalPartyCreateGuaranteeCommand(
+        string TaxId,
+        string Name,
+        string Street,
+        string City,
+        string State
     );
     
     public class CreateGuaranteeHandler
@@ -34,8 +42,16 @@ namespace EventSourcingPoc.API.Handlers
                 InitialAmountCoverage: new Money(command.Amount, Currency.CLP),
                 Price: new Money(command.Cost, Currency.CLP),
                 Bond: command.Bond,
-                Supplier: new LegalParty("111111111", "Cliente", new Address("Calle 2", "Santiago", "Metropolitana")),
-                Beneficiary: new LegalParty("444444444", "Mandante", new Address("Calle 10", "Santiago", "Metropolitana")),
+                Supplier: new LegalParty(
+                    command.Supplier.TaxId,
+                    command.Supplier.Name,
+                    new Address(command.Supplier.Street, command.Supplier.City, command.Supplier.State)
+                ),
+                Beneficiary: new LegalParty(
+                    command.Beneficiary.TaxId,
+                    command.Beneficiary.Name,
+                    new Address(command.Beneficiary.Street, command.Beneficiary.City, command.Beneficiary.State)
+                ),
                 Gloss: command.Gloss
             );
             _session.Events.Append(id, @event);
