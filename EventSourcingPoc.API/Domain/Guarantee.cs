@@ -9,10 +9,10 @@ namespace EventSourcingPoc.API.Domain
     public class Guarantee : IAggregateRoot
     {
         public Guid Id { get; private set; }
-        public string? TenderId { get; private set; }
-        public string Gloss { get; private set; } = string.Empty;
+        public GuaranteeInformation Information { get; private set; }
         public DateRange CurrentDateCoverage { get; private set; }
-        public Money CurrentAmountCoverage { get; private set; }
+        public Money AmountCoverage { get; private set; }
+        public Money RemainingAmount { get; private set; }
         public GuaranteeBond Bond { get; private set; }
         public GuaranteeStatus Status {  get; private set; }
 
@@ -25,7 +25,7 @@ namespace EventSourcingPoc.API.Domain
         /// En este contexto, el "Beneficiario" se refiere a la parte que se beneficia de la garantía, es decir, la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. El beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
         /// </summary>
         public LegalParty Beneficiary { get; private set; }
-        public Insurance Insurance { get; private set; }
+        public InsuranceParty Insurance { get; private set; }
 
         private readonly List<object> _uncommittedEvents = new();
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
@@ -48,13 +48,12 @@ namespace EventSourcingPoc.API.Domain
         public void Apply(GuaranteeRequested @event)
         {
             Id = @event.Id;
-            TenderId = @event.TenderId;
+            Information = new GuaranteeInformation(@event.TenderId, @event.Gloss, null);
             Bond = @event.Bond;
             Status = GuaranteeStatus.Draft;
             Supplier = @event.Supplier;
             Beneficiary = @event.Beneficiary;
-            Gloss = @event.Gloss;
-            CurrentAmountCoverage = @event.InitialAmountCoverage;
+            AmountCoverage = @event.InitialAmountCoverage;
         }
 
 
@@ -63,7 +62,14 @@ namespace EventSourcingPoc.API.Domain
             Status = GuaranteeStatus.Issued;
         }
     }
-
+    
+    /// <summary>
+    /// Object value representing the insurance party, which includes the tax ID, name, and an optional legacy ID from the legacy system.
+    /// </summary>
+    /// <param name="TaxId"></param>
+    /// <param name="Name"></param>
+    /// <param name="LegacyId"></param>
+    public record InsuranceParty(string TaxId, string Name, int? LegacyId);
     public record GuaranteeInformation(string? TenderId, string Gloss, string? EndorsementNumber);
     public record GuaranteeNumber(long Number, string Code);
 
