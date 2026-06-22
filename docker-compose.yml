@@ -1,0 +1,30 @@
+services:
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  web-api:
+    image: guarantee-app:latest
+    build:
+      context: .
+      dockerfile: EventSourcingPoc.API/Dockerfile
+    container_name: dotnet_guarantee_api
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__Marten=${DB_CONNECTION_STRING}
+    depends_on:
+      - postgres-db
+volumes:
+  postgres_data:
