@@ -13,7 +13,7 @@ namespace EventSourcingPoc.API.Handlers
         decimal Cost,
         Guid CustomerId,
         Guid BeneficiaryId,
-        GuaranteeBond Purpose
+        GuaranteeBond Bond
     );
     
     public class CreateGuaranteeHandler
@@ -33,7 +33,7 @@ namespace EventSourcingPoc.API.Handlers
                 InitialDateCoverage: new DateRange(command.Start, command.End),
                 InitialAmountCoverage: new Money(command.Amount, Currency.CLP),
                 Price: new Money(command.Cost, Currency.CLP),
-                Purpose: command.Purpose,
+                Bond: command.Bond,
                 Supplier: new LegalParty("111111111", "Cliente", new Address("Calle 2", "Santiago", "Metropolitana")),
                 Beneficiary: new LegalParty("444444444", "Mandante", new Address("Calle 10", "Santiago", "Metropolitana")),
                 Gloss: command.Gloss
