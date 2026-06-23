@@ -13,7 +13,6 @@ namespace EventSourcingPoc.API.Projections
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
         public Money AmountCoverage { get; set; } = null!;
-        public GuaranteeBond Bond { get; set; }
         public GuaranteeStatus Status { get; set; }
         public LegalParty Supplier { get; set; } = null!;
         public LegalParty Beneficiary { get; set; } = null!;
@@ -32,7 +31,6 @@ namespace EventSourcingPoc.API.Projections
                 Start = @event.Start,
                 End = @event.End,
                 AmountCoverage = @event.InitialAmountCoverage,
-                Bond = @event.Bond,
                 Status = GuaranteeStatus.Draft,
             };
         }

@@ -18,7 +18,7 @@ namespace EventSourcingPoc.API.Events
         Guid Id,
         string TenderId,
         string Gloss,
-        GuaranteeBond Bond,
+        GuaranteeRequestBond Bond,
         LegalPartyInfo Supplier,
         LegalPartyInfo Beneficiary,
         DateTime Start,
@@ -26,6 +26,8 @@ namespace EventSourcingPoc.API.Events
         Money InitialAmountCoverage,
         Money Price
     );
+
+    public record GuaranteeRequestBond(int Id, string Name);
 
     public record LegalPartyInfo(string TaxId, 
         string Name,
@@ -121,6 +123,8 @@ namespace EventSourcingPoc.API.Events
     /// <param name="AmountCoverage"></param>
     /// <param name="Price"></param>
     public record GuaranteeEndorsementRequested(
+        Guid RequestId,
+        Guid GuaranteeId,
         DateTime? EndDateCoverage,
         decimal? AmountCoverage,
         decimal Price

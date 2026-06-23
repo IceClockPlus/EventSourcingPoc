@@ -8,6 +8,10 @@ namespace EventSourcingPoc.API.EFContext
     {
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Bond> Bonds { get; set; }
+        public GuaranteeContext(DbContextOptions<GuaranteeContext> options):base(options)
+        {
+                
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
@@ -22,6 +26,7 @@ namespace EventSourcingPoc.API.EFContext
         public decimal EnterpriseFactor { get; set; }
         public decimal ExecutiveFactor { get; set; }
         public decimal ExecutiveRenewalFactor { get; set; }
+        public long CertificateNumberCounter { get; set; }
     }
 
     public class Bond
@@ -36,6 +41,7 @@ namespace EventSourcingPoc.API.EFContext
         public void Configure(EntityTypeBuilder<Bond> builder)
         {
             builder.HasKey(p => p.Id);
+            builder.Property(p => p.Name).HasMaxLength(100);
         }
     }
 
@@ -44,6 +50,7 @@ namespace EventSourcingPoc.API.EFContext
         public void Configure(EntityTypeBuilder<Insurance> builder)
         {
             builder.HasKey(p => p.Id);
+            builder.Property(p => p.Name).HasMaxLength(100);
         }
     }
 }

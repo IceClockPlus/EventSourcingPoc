@@ -17,10 +17,18 @@ namespace EventSourcingPoc.API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> CreateGuarantee(CreateGuaranteeCommand command)
+        public async Task<ActionResult> CreateGuarantee(CreateGuaranteeCommand command, CancellationToken cancellationToken)
         {
-            await _createGuaranteeHandler.Handle(command, CancellationToken.None);
-            return Ok();
+            var response = await _createGuaranteeHandler.Handle(command, cancellationToken);
+            if (!response.Success)
+            {
+                return Problem(
+                    title: "Error al solicitar garantia",
+                    detail: response.Error,
+                    statusCode: StatusCodes.Status422UnprocessableEntity
+                );
+            }
+            return Ok(response);
         }
 
         [HttpPost("{id}/cost")]

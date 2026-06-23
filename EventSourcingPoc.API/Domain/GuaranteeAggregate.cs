@@ -16,7 +16,8 @@ namespace EventSourcingPoc.API.Domain
         public DateRange CurrentDateCoverage { get; private set; } = null!;
         public Money AmountCoverage { get; private set; } = null!;
         public Money RemainingAmount { get; private set; } = null!;
-        public GuaranteeBond Bond { get; private set; }
+        public GuaranteeBond Bond { get; private set; } = null!;
+        public GuaranteeCode? Code { get; private set; }
         public GuaranteeStatus Status {  get; private set; }
 
         /// <summary>
@@ -52,7 +53,7 @@ namespace EventSourcingPoc.API.Domain
             Id = @event.Id;
             Information = new GuaranteeInformation(@event.TenderId, @event.Gloss, null);
             CurrentDateCoverage = new(@event.Start, @event.End);
-            Bond = @event.Bond;
+            Bond = new GuaranteeBond(@event.Bond.Id, @event.Bond.Name);
             Status = GuaranteeStatus.Draft;
             Supplier = new LegalParty(
                 TaxId: @event.Supplier.TaxId,
@@ -82,9 +83,8 @@ namespace EventSourcingPoc.API.Domain
     /// <param name="LegacyId"></param>
     public record InsuranceParty(string TaxId, string Name, int? LegacyId);
     public record GuaranteeInformation(string? TenderId, string Gloss, string? EndorsementNumber);
-    public record GuaranteeNumber(long Number, string Code);
-
-
+    public record GuaranteeCode(long Number, string Code);
+    public record GuaranteeBond(int Id, string Name);
     public record LegalParty(string TaxId, string Name, Address Address);
     public record Address(string Street, string Location, string Area);
 
@@ -126,16 +126,16 @@ namespace EventSourcingPoc.API.Domain
         Correction = 3,
     }
 
-    public enum GuaranteeBond
-    {
-        BidBond = 0,
-        PerformanceBond = 1,
-        DefectLiabilityBond = 2,
-        PerformanceAndDefectLiabilityBond = 3,
-        MaintenanceAndOperationalPerformanceBond = 4,
-        AdvancePaymentBond = 5,
-        RetentionMoneyBond = 6         
-    }
+    //public enum GuaranteeBond
+    //{
+    //    BidBond = 0,
+    //    PerformanceBond = 1,
+    //    DefectLiabilityBond = 2,
+    //    PerformanceAndDefectLiabilityBond = 3,
+    //    MaintenanceAndOperationalPerformanceBond = 4,
+    //    AdvancePaymentBond = 5,
+    //    RetentionMoneyBond = 6         
+    //}
 
     public enum GuaranteeStatus
     {
