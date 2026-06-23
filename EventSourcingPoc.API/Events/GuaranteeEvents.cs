@@ -19,11 +19,19 @@ namespace EventSourcingPoc.API.Events
         string TenderId,
         string Gloss,
         GuaranteeBond Bond,
-        LegalParty Supplier,
-        LegalParty Beneficiary,
-        DateRange InitialDateCoverage,
+        LegalPartyInfo Supplier,
+        LegalPartyInfo Beneficiary,
+        DateTime Start,
+        DateTime End,
         Money InitialAmountCoverage,
         Money Price
+    );
+
+    public record LegalPartyInfo(string TaxId, 
+        string Name,
+        string AddressStreet,
+        string AddressLocation,
+        string AddressRegion
     );
 
     /// <summary>
@@ -118,6 +126,8 @@ namespace EventSourcingPoc.API.Events
         decimal Price
     );
 
+    public record Evaluator(string Id, string Name);
+
     /// <summary>
     /// Event triggered when a guarantee endorsement evaluation is requested, containing the reason for the evaluation request.
     /// </summary>
@@ -129,14 +139,14 @@ namespace EventSourcingPoc.API.Events
     /// </summary>
     /// <param name="Reason"></param>
     /// <param name="ApprovalDate"></param>
-    public record GuaranteeEndorsementEvaluationApproved(string Reason, DateTime ApprovalDate);
+    public record GuaranteeEndorsementEvaluationApproved(string Reason, DateTime ApprovalDate, Evaluator Evaluator);
 
     /// <summary>
     /// Event triggered when a guarantee endorsement evaluation is rejected, containing the reason for rejection and the date of rejection.
     /// </summary>
     /// <param name="Reason"></param>
     /// <param name="RejectionDate"></param>
-    public record GuaranteeEndorsementEvaluationRejected(string Reason, DateTime RejectionDate);
+    public record GuaranteeEndorsementEvaluationRejected(string Reason, DateTime RejectionDate, Evaluator Evaluator);
 
     /// <summary>
     /// Event triggered when a guarantee endorsement is abandoned, containing the reason for abandonment and the date of abandonment.

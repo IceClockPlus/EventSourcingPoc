@@ -13,7 +13,7 @@ namespace EventSourcingPoc.API.Handlers
         private readonly IDocumentSession _session = session;
         public async Task Handle(ConfirmGuaranteePriceCommand command, CancellationToken cancellationToken )
         {
-            var guarantee = await _session.Events.AggregateStreamAsync<Guarantee>(command.GuaranteeId, token: cancellationToken);
+            var guarantee = await _session.Events.AggregateStreamAsync<GuaranteeAggregate>(command.GuaranteeId, token: cancellationToken);
             if (guarantee == null) throw new ArgumentNullException();
             //guarantee.ConfirmPrice(money, lastEndorsement.Sequence);
 

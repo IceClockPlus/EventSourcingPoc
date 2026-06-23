@@ -38,19 +38,24 @@ namespace EventSourcingPoc.API.Handlers
             GuaranteeRequested @event = new GuaranteeRequested(
                 Id: id,
                 TenderId: command.TenderId,
-                InitialDateCoverage: new DateRange(command.Start, command.End),
+                Start: command.Start,
+                End: command.End,
                 InitialAmountCoverage: new Money(command.Amount, Currency.CLP),
                 Price: new Money(command.Cost, Currency.CLP),
                 Bond: command.Bond,
-                Supplier: new LegalParty(
+                Supplier: new LegalPartyInfo(
                     command.Supplier.TaxId,
                     command.Supplier.Name,
-                    new Address(command.Supplier.Street, command.Supplier.City, command.Supplier.State)
+                    command.Supplier.Street,
+                    command.Supplier.City,
+                    command.Supplier.State
                 ),
-                Beneficiary: new LegalParty(
+                Beneficiary: new LegalPartyInfo(
                     command.Beneficiary.TaxId,
                     command.Beneficiary.Name,
-                    new Address(command.Beneficiary.Street, command.Beneficiary.City, command.Beneficiary.State)
+                    command.Beneficiary.Street,
+                    command.Beneficiary.City,
+                    command.Beneficiary.State
                 ),
                 Gloss: command.Gloss
             );

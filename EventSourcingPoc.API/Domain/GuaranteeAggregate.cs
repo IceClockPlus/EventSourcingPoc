@@ -6,26 +6,29 @@ using System.Resources;
 
 namespace EventSourcingPoc.API.Domain
 {
-    public class Guarantee : IAggregateRoot
+    /// <summary>
+    /// Aggregate that represents the guarantee
+    /// </summary>
+    public class GuaranteeAggregate : IAggregateRoot
     {
         public Guid Id { get; private set; }
-        public GuaranteeInformation Information { get; private set; }
-        public DateRange CurrentDateCoverage { get; private set; }
-        public Money AmountCoverage { get; private set; }
-        public Money RemainingAmount { get; private set; }
+        public GuaranteeInformation Information { get; private set; } = null!;
+        public DateRange CurrentDateCoverage { get; private set; } = null!;
+        public Money AmountCoverage { get; private set; } = null!;
+        public Money RemainingAmount { get; private set; } = null!;
         public GuaranteeBond Bond { get; private set; }
         public GuaranteeStatus Status {  get; private set; }
 
         /// <summary>
         /// En este contexto, el "Proveedor" se refiere a la parte que solicita la garantía, es decir, la empresa o individuo que necesita la garantía para respaldar su participación en un proceso de licitación o contrato. El "Beneficiario" es la parte que se beneficia de la garantía, generalmente la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
         /// </summary>
-        public LegalParty Supplier { get; private set; }
+        public LegalParty Supplier { get; private set; } = null!;
 
         /// <summary>
         /// En este contexto, el "Beneficiario" se refiere a la parte que se beneficia de la garantía, es decir, la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. El beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
         /// </summary>
-        public LegalParty Beneficiary { get; private set; }
-        public InsuranceParty Insurance { get; private set; }
+        public LegalParty Beneficiary { get; private set; } = null!;
+        public InsuranceParty Insurance { get; private set; } = null!;
 
         private readonly List<object> _uncommittedEvents = new();
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
@@ -43,19 +46,27 @@ namespace EventSourcingPoc.API.Domain
             }
         }
 
-        public Guarantee() { }
 
         public void Apply(GuaranteeRequested @event)
         {
             Id = @event.Id;
             Information = new GuaranteeInformation(@event.TenderId, @event.Gloss, null);
+            CurrentDateCoverage = new(@event.Start, @event.End);
             Bond = @event.Bond;
             Status = GuaranteeStatus.Draft;
-            Supplier = @event.Supplier;
-            Beneficiary = @event.Beneficiary;
+            Supplier = new LegalParty(
+                TaxId: @event.Supplier.TaxId,
+                Name: @event.Supplier.Name,
+                Address: new Address(@event.Supplier.AddressStreet, @event.Supplier.AddressLocation, @event.Supplier.AddressRegion)
+            );
+            Beneficiary = new LegalParty(
+                TaxId: @event.Beneficiary.TaxId,
+                Name: @event.Beneficiary.Name,
+                Address: new Address(@event.Beneficiary.AddressStreet, @event.Beneficiary.AddressLocation, @event.Beneficiary.AddressRegion)
+
+            );
             AmountCoverage = @event.InitialAmountCoverage;
         }
-
 
         public void Apply(GuaranteeIssued @event)
         {
