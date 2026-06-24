@@ -23,6 +23,8 @@ builder.Services.AddProblemDetails(options =>
     };
 });
 
+builder.Services.AddScoped<IBrokerService, BrokerService>();
+builder.Services.AddScoped<IInsuranceService, InsuranceService>();
 builder.Services.AddScoped<IBondsService, BondsService>();
 
 builder.Services.AddScoped<CreateGuaranteeHandler>();
