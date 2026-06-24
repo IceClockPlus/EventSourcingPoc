@@ -29,7 +29,8 @@ namespace EventSourcingPoc.API.Domain
         /// En este contexto, el "Beneficiario" se refiere a la parte que se beneficia de la garantía, es decir, la entidad que requiere la garantía como parte de los requisitos del proceso de licitación o contrato. El beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor. En este caso, el proveedor es quien solicita la garantía y el beneficiario es quien recibe la protección que ofrece la garantía en caso de incumplimiento por parte del proveedor.
         /// </summary>
         public LegalParty Beneficiary { get; private set; } = null!;
-        public InsuranceParty Insurance { get; private set; } = null!;
+        public GuaranteeInsurance Insurance { get; private set; } = null!;
+        public GuaranteeBroker? Broker { get; private set; }
 
         private readonly List<object> _uncommittedEvents = new();
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
@@ -66,22 +67,31 @@ namespace EventSourcingPoc.API.Domain
                 Address: new Address(@event.Beneficiary.AddressStreet, @event.Beneficiary.AddressLocation, @event.Beneficiary.AddressRegion)
 
             );
+            Insurance = new GuaranteeInsurance(
+                Id: @event.Insurance.Id,
+                Name: @event.Insurance.Name,
+                LegacyId: @event.Insurance.LegacyId
+            );
+            Broker = @event.Broker != null ? new GuaranteeBroker(@event.Broker.Id, @event.Broker.Name) : null;
             AmountCoverage = @event.InitialAmountCoverage;
         }
 
         public void Apply(GuaranteeIssued @event)
         {
             Status = GuaranteeStatus.Issued;
+            Code = new GuaranteeCode(@event.CertificateNumber, @event.Code);
         }
     }
     
     /// <summary>
     /// Object value representing the insurance party, which includes the tax ID, name, and an optional legacy ID from the legacy system.
     /// </summary>
-    /// <param name="TaxId"></param>
+    /// <param name="Id"></param>
     /// <param name="Name"></param>
     /// <param name="LegacyId"></param>
-    public record InsuranceParty(string TaxId, string Name, int? LegacyId);
+    public record GuaranteeInsurance(int Id, string Name, int? LegacyId);
+    public record GuaranteeBroker(int Id, string Name);
+
     public record GuaranteeInformation(string? TenderId, string Gloss, string? EndorsementNumber);
     public record GuaranteeCode(long Number, string Code);
     public record GuaranteeBond(int Id, string Name);
@@ -111,19 +121,6 @@ namespace EventSourcingPoc.API.Domain
         CLP = 0,
         UF = 1,
         USD = 2
-    }
-
-    public enum Insurance
-    {
-        Internal = 0
-    }
-
-    public enum EndorsementType
-    {
-        InitialIssuance = 0,
-        Extension = 1,
-        ValueAdjustment = 2,
-        Correction = 3,
     }
 
     //public enum GuaranteeBond

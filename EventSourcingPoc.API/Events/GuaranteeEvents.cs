@@ -21,14 +21,18 @@ namespace EventSourcingPoc.API.Events
         GuaranteeRequestBond Bond,
         LegalPartyInfo Supplier,
         LegalPartyInfo Beneficiary,
+        InsurancePartyInfo Insurance,
         DateTime Start,
         DateTime End,
         Money InitialAmountCoverage,
-        Money Price
+        Money Price,
+        GuaranteeBroker? Broker = null
     );
 
     public record GuaranteeRequestBond(int Id, string Name);
 
+    public record GuaranteeBroker(int Id, string Name);
+    public record InsurancePartyInfo(int Id, string Name, int? LegacyId);
     public record LegalPartyInfo(string TaxId, 
         string Name,
         string AddressStreet,

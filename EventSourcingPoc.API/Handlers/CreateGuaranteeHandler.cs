@@ -18,7 +18,9 @@ namespace EventSourcingPoc.API.Handlers
         Currency CurrencyPrice,
         LegalPartyCreateGuaranteeCommand Supplier,
         LegalPartyCreateGuaranteeCommand Beneficiary,
-        int Bond
+        int Bond,
+        int InsuranceId,
+        int? BrokerId
     );
 
     public record LegalPartyCreateGuaranteeCommand(
@@ -29,23 +31,30 @@ namespace EventSourcingPoc.API.Handlers
         string State
     );
     
-    public class CreateGuaranteeHandler
+    public class CreateGuaranteeHandler(IDocumentSession session, IBondsService bondsService, IInsuranceService insuranceService, IBrokerService brokerService)
     {
-        private readonly IBondsService _bondsService;
-        private readonly IDocumentSession _session;
-        public CreateGuaranteeHandler(IDocumentSession session, IBondsService bondsService)
-        {
-            _session = session;
-            _bondsService = bondsService;
-        }
+        private readonly IInsuranceService _insuranceService = insuranceService;
+        private readonly IBondsService _bondsService = bondsService;
+        private readonly IDocumentSession _session = session;
+        private readonly IBrokerService _brokerService = brokerService;
 
         public async Task<Result<GuaranteeDto>> Handle(CreateGuaranteeCommand command, CancellationToken cancellationToken)
         {
             Guid id = Guid.CreateVersion7();
 
-            var bond = await _bondsService.GetById((int)command.Bond, cancellationToken);
+            var bond = await _bondsService.GetById(command.Bond, cancellationToken);
             if (bond == null) return Result<GuaranteeDto>.Failure("Finalidad no encontrada");
 
+            var insurance = await _insuranceService.GetInsurance(command.InsuranceId, cancellationToken);
+            if (insurance == null) return Result<GuaranteeDto>.Failure("Aseguradora no encontrada");
+
+            BrokerInfo? broker = null;
+            if (command.BrokerId.HasValue)
+            {
+                broker = await _brokerService.GetBrokerInfoAsync(command.BrokerId.Value, cancellationToken);
+                if (broker == null) return Result<GuaranteeDto>.Failure("Corredora no encontrada");
+            }
+           
             GuaranteeRequested @event = new GuaranteeRequested(
                 Id: id,
                 TenderId: command.TenderId,
@@ -54,6 +63,11 @@ namespace EventSourcingPoc.API.Handlers
                 InitialAmountCoverage: new Money(command.Amount, command.CurrencyAmount),
                 Price: new Money(command.Price, command.CurrencyPrice),
                 Bond: new GuaranteeRequestBond(bond.Id, bond.Name),
+                Insurance: new InsurancePartyInfo(
+                    Id: insurance.Id,
+                    Name: insurance.Name,
+                    LegacyId: insurance.LegacyId
+                ),
                 Supplier: new LegalPartyInfo(
                     command.Supplier.TaxId,
                     command.Supplier.Name,

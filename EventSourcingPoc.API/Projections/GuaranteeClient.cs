@@ -16,7 +16,7 @@ namespace EventSourcingPoc.API.Projections
         public GuaranteeStatus Status { get; set; }
         public LegalParty Supplier { get; set; } = null!;
         public LegalParty Beneficiary { get; set; } = null!;
-        public InsuranceParty Insurance { get; set; } = null!;
+        public GuaranteeInsurance Insurance { get; set; } = null!;
     }
 
     public partial class GuaranteeClientProjection : SingleStreamProjection<GuaranteeClient, Guid>

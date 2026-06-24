@@ -5,7 +5,7 @@ namespace EventSourcingPoc.API.Services
 {
     public class InsuranceInfo
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
         public int? LegacyId { get; set; }
         public long CurrentNumberCounter { get; set; }
@@ -13,15 +13,15 @@ namespace EventSourcingPoc.API.Services
 
     public interface IInsuranceService
     {
-        Task<InsuranceInfo?> GetInsurance(string id, CancellationToken cancellationToken);
+        Task<InsuranceInfo?> GetInsurance(int id, CancellationToken cancellationToken);
         Task<InsuranceInfo?> GetInsuranceByLegacyId(int legacyId, CancellationToken cancellationToken);
-        Task<long> GenerateNewCertificateNumber(string id, CancellationToken cancellationToken);
+        Task<long> GenerateNewCertificateNumber(int id, CancellationToken cancellationToken);
     }
 
     public class InsuranceService(GuaranteeContext context) : IInsuranceService
     {
         private readonly GuaranteeContext _context = context;
-        public async Task<InsuranceInfo?> GetInsurance(string id, CancellationToken cancellationToken)
+        public async Task<InsuranceInfo?> GetInsurance(int id, CancellationToken cancellationToken)
         {
             var insurance = await _context.Insurances
                 .Select(i => new InsuranceInfo
@@ -61,7 +61,7 @@ namespace EventSourcingPoc.API.Services
         /// DOT NOT REFACTORING to either EF CORE (Read -> Update -> Save) nor 'ExecuteUpdateAsync' with a subsequent query,
         /// since both will leave a milliseconds gap prone to race conditions on high concurrent environment
         /// </remarks>
-        public async Task<long> GenerateNewCertificateNumber(string id, CancellationToken cancellationToken)
+        public async Task<long> GenerateNewCertificateNumber(int id, CancellationToken cancellationToken)
         {
             var certificateNumber = await _context.Database
                 .SqlQueryRaw<long>(

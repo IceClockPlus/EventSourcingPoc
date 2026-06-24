@@ -21,7 +21,7 @@ namespace EventSourcingPoc.API.EFContext
 
     public class Insurance
     {
-        public required string Id { get; set; }
+        public int Id { get; set; }
         public required string Name { get; set; }
         public int? LegacyId { get; set; }
         public decimal EnterpriseFactor { get; set; }
