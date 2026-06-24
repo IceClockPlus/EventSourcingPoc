@@ -2,6 +2,7 @@
 using EventSourcingPoc.API.EFContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventSourcingPoc.API.EFContext.Migrations
 {
     [DbContext(typeof(GuaranteeContext))]
-    partial class GuaranteeContextModelSnapshot : ModelSnapshot
+    [Migration("20260624192306_BrokerTable")]
+    partial class BrokerTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

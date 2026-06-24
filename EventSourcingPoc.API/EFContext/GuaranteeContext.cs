@@ -8,6 +8,7 @@ namespace EventSourcingPoc.API.EFContext
     {
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Bond> Bonds { get; set; }
+        public DbSet<Broker> Brokers { get; set; }
         public GuaranteeContext(DbContextOptions<GuaranteeContext> options):base(options)
         {
                 
@@ -29,11 +30,25 @@ namespace EventSourcingPoc.API.EFContext
         public long CertificateNumberCounter { get; set; }
     }
 
+    public class Broker
+    {
+        public int Id { get; set; }
+        public required string Name { get; set; }
+    }
+
     public class Bond
     {
         public int Id { get; set; }
         public required string Name { get; set; }
         public int? LegacyId { get; set; }
+    }
+
+    public class BrokerConfiguration : IEntityTypeConfiguration<Broker>
+    {
+        public void Configure(EntityTypeBuilder<Broker> builder)
+        {
+            builder.HasKey(p => p.Id);
+        }
     }
 
     public class BondConfiguration : IEntityTypeConfiguration<Bond>
