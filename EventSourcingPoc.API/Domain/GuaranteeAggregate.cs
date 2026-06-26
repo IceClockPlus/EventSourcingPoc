@@ -31,6 +31,7 @@ namespace EventSourcingPoc.API.Domain
         public LegalParty Beneficiary { get; private set; } = null!;
         public GuaranteeInsurance Insurance { get; private set; } = null!;
         public GuaranteeBroker? Broker { get; private set; }
+        public int Version { get; private set; }
 
         private readonly List<object> _uncommittedEvents = new();
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
@@ -74,6 +75,46 @@ namespace EventSourcingPoc.API.Domain
             );
             Broker = @event.Broker != null ? new GuaranteeBroker(@event.Broker.Id, @event.Broker.Name) : null;
             AmountCoverage = @event.InitialAmountCoverage;
+            Version = 1;
+        }
+
+        public void Apply(GuaranteeInformationUpdated @event)
+        {
+            Information = Information with
+            {
+                TenderId = @event.TenderId ?? Information.TenderId,
+                Gloss = @event.Gloss ?? Information.Gloss,
+            };
+        }
+
+        public void Apply(GuaranteeSupplierInformationUpdated @event)
+        {
+
+            Supplier = Supplier with
+            {
+                Name = @event.Name ?? Supplier.Name,
+                Address = Supplier.Address with
+                {
+                    Street = @event.AddressStreet ??  Supplier.Address.Street,
+                    Location = @event.AddressLocation ?? Supplier.Address.Location,
+                    Region = @event.AddressRegion ?? Supplier.Address.Region,
+                }
+            };
+        }
+
+        public void Apply(GuaranteeBeneficiaryInformationUpdated @event)
+        {
+            Beneficiary = Beneficiary with
+            {
+                Name = @event.Name ?? Beneficiary.Name,
+                Address = Beneficiary.Address with
+                {
+                    Street = @event.AddressStreet ?? Beneficiary.Address.Street,
+                    Location = @event.AddressLocation ?? Beneficiary.Address.Location,
+                    Region = @event.AddressRegion ?? Beneficiary.Address.Region,
+                }
+
+            };
         }
 
         public void Apply(GuaranteeIssued @event)
@@ -96,7 +137,7 @@ namespace EventSourcingPoc.API.Domain
     public record GuaranteeCode(long Number, string Code);
     public record GuaranteeBond(int Id, string Name);
     public record LegalParty(string TaxId, string Name, Address Address);
-    public record Address(string Street, string Location, string Area);
+    public record Address(string Street, string Location, string Region);
 
     public record Money(decimal Amount, Currency Currency)
     {
