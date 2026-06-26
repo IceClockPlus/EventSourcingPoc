@@ -28,6 +28,7 @@ builder.Services.AddScoped<IInsuranceService, InsuranceService>();
 builder.Services.AddScoped<IBondsService, BondsService>();
 
 builder.Services.AddScoped<CreateGuaranteeHandler>();
+builder.Services.AddScoped<IssueGuaranteeHandler>();
 builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
 builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
