@@ -70,9 +70,9 @@ namespace EventSourcingPoc.API.Services
                     WHERE id = {0}
                     RETURNING certificate_number_counter",
                     id
-                ).SingleAsync(cancellationToken);
+                ).ToListAsync(cancellationToken);
 
-            return certificateNumber;
+            return certificateNumber.Single();
         }
     }
 }
