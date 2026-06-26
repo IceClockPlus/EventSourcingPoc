@@ -191,29 +191,29 @@ namespace EventSourcingPoc.API.Events
     /// Event triggered when a guarantee beneficiary information is updated, containing the updated beneficiary details for the guarantee.
     /// </summary>
     /// <remarks>The beneficiary update does not allow update its TaxId, as it is a unique identifier for the beneficiary and should not be changed once set.</remarks>
-    /// <param name="BeneficiaryName"></param>
-    /// <param name="BeneficiaryStreet"></param>
-    /// <param name="BeneficiaryLocation"></param>
-    /// <param name="BeneficiaryArea"></param>
+    /// <param name="Name"></param>
+    /// <param name="AddressStreet"></param>
+    /// <param name="AddressLocation"></param>
+    /// <param name="AddressRegion"></param>
     public record GuaranteeBeneficiaryInformationUpdated(
-        string? BeneficiaryName,
-        string? BeneficiaryStreet,
-        string? BeneficiaryLocation,
-        string? BeneficiaryArea
+        string? Name,
+        string? AddressStreet,
+        string? AddressLocation,
+        string? AddressRegion
     );
 
     /// <summary>
     /// Event triggered when a guarantee client information is updated, containing the updated client details for the guarantee.
     /// </summary>
     /// <remarks>The client update does not allow update its TaxId, as it is a unique identifier for the client and should not be changed once set.</remarks>
-    /// <param name="ClientName"></param>
-    /// <param name="ClientStreet"></param>
-    /// <param name="ClientLocation"></param>
-    /// <param name="ClientArea"></param>
-    public record GuaranteeClientInformationUpdated(
-        string? ClientName,
-        string? ClientStreet,
-        string? ClientLocation,
-        string? ClientArea
+    /// <param name="Name"></param>
+    /// <param name="AddressStreet"></param>
+    /// <param name="AddressLocation"></param>
+    /// <param name="AddressRegion"></param>
+    public record GuaranteeSupplierInformationUpdated(
+        string? Name,
+        string? AddressStreet,
+        string? AddressLocation,
+        string? AddressRegion
     );
 }

@@ -29,6 +29,7 @@ builder.Services.AddScoped<IBondsService, BondsService>();
 
 builder.Services.AddScoped<CreateGuaranteeHandler>();
 builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
+builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
 builder.Services.AddSingleton(TimeProvider.System);
 
