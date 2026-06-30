@@ -57,13 +57,13 @@ namespace EventSourcingPoc.API.Events
     /// Event triggered when a guarantee risk evaluation is approved, containing the reason for approval.
     /// </summary>
     /// <param name="Reason"></param>
-    public record GuaranteeRiskEvaluationApproved(string Reason);
+    public record GuaranteeRiskEvaluationApproved(string EvaluatorId, string EvaluatorName, string? Observations);
     /// <summary>
     /// Event triggered when a guarantee risk evaluation is rejected, containing the reason for rejection.
     /// </summary>
     /// <param name="Reason"></param>
     /// <param name="RejectionDate"></param>
-    public record GuaranteeRiskEvaluationRejected(string Reason, DateTime RejectionDate);
+    public record GuaranteeRiskEvaluationRejected(string EvaluatorId, string EvaluatorName, string? Observations);
     /// <summary>
     /// Event triggered when a guarantee payment is confirmed, containing the amount paid and the date of payment.
     /// </summary>
@@ -111,7 +111,7 @@ namespace EventSourcingPoc.API.Events
     /// </summary>
     /// <param name="PaidAmount"></param>
     /// <param name="PaidDate"></param>
-    public record GuaranteeClaimPaid(decimal PaidAmount, DateTime PaidDate);
+    public record GuaranteeClaimPaid(decimal PaidAmount, string PaymentCode, DateTime PaidDate);
 
     /// <summary>
     /// Event triggered when a guarantee is cancelled, containing the reason for cancellation and the date of cancellation.

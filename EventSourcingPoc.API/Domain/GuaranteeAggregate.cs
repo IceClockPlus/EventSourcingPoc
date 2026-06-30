@@ -37,17 +37,29 @@ namespace EventSourcingPoc.API.Domain
         public IReadOnlyCollection<object> GetUncommittedEvents() => _uncommittedEvents.AsReadOnly();
         public void ClearUncommittedEvents() => _uncommittedEvents.Clear();
 
-        private void RaiseEvent(object @event)
-        {
-            _uncommittedEvents.Add(@event);
-            switch (@event)
-            {
-                case GuaranteeRequested e: Apply(e); break;
-                //case GuaranteePriceConfirmed e: Apply(e); break;
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
+        //private void RaiseEvent(object @event)
+        //{
+        //    _uncommittedEvents.Add(@event);
+        //    switch (@event)
+        //    {
+        //        case GuaranteeRequested e: Apply(e); break;
+        //        //case GuaranteePriceConfirmed e: Apply(e); break;
+        //        default:
+        //            throw new InvalidOperationException();
+        //    }
+        //}
+
+        public bool IsSupplierInfoCompleted => !string.IsNullOrWhiteSpace(Supplier.Name)
+            && !string.IsNullOrWhiteSpace(Supplier.Address.Street)
+            && !string.IsNullOrWhiteSpace(Supplier.Address.Location)
+            && !string.IsNullOrWhiteSpace(Supplier.Address.Region);
+
+        public bool IsBeneficiaryInfoCompleted => !string.IsNullOrWhiteSpace(Beneficiary.Name)
+            && !string.IsNullOrWhiteSpace(Beneficiary.Address.Street)
+            && !string.IsNullOrWhiteSpace(Beneficiary.Address.Location)
+            && !string.IsNullOrWhiteSpace(Beneficiary.Address.Region);
+
+        public bool IsEnabledToIssue => Status == GuaranteeStatus.Paid && IsBeneficiaryInfoCompleted && IsSupplierInfoCompleted;
 
 
         public void Apply(GuaranteeRequested @event)
@@ -164,17 +176,6 @@ namespace EventSourcingPoc.API.Domain
         USD = 2
     }
 
-    //public enum GuaranteeBond
-    //{
-    //    BidBond = 0,
-    //    PerformanceBond = 1,
-    //    DefectLiabilityBond = 2,
-    //    PerformanceAndDefectLiabilityBond = 3,
-    //    MaintenanceAndOperationalPerformanceBond = 4,
-    //    AdvancePaymentBond = 5,
-    //    RetentionMoneyBond = 6         
-    //}
-
     public enum GuaranteeStatus
     {
         Draft = 0,
@@ -183,20 +184,7 @@ namespace EventSourcingPoc.API.Domain
         Issued = 3,
         Finalized = 4,
         Cancelled = 5,
-    }
-
-    public static class GuaranteeExtensionMethods
-    {
-        private static readonly ResourceManager _resourceManager = new("EventSourcingPoc.API.Resources.GuaranteeResources", Assembly.GetExecutingAssembly());
-        public static string EnumValue(this GuaranteeBond purpose, string culture = "es")
-        {
-            //Crear cultura
-            string llaveRecurso = purpose.ToString();
-            CultureInfo cultureInfo = new CultureInfo(culture);
-
-            // Obtener el nombre de la finalidad de la garantía desde el recurso utilizando la cultura especificada
-            var nombreFinalidad = _resourceManager.GetString(llaveRecurso, cultureInfo);
-            return nombreFinalidad ?? throw new ArgumentNullException($"No se encontró el recurso para la finalidad de garantía: {purpose} con cultura: {culture}");
-        }
+        RiskEvaluation = 6,
+        RiskRejected = 7,
     }
 }
