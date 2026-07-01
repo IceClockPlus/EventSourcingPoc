@@ -26,6 +26,7 @@ namespace EventSourcingPoc.API.Events
         DateTime End,
         Money InitialAmountCoverage,
         Money Price,
+        int Version = 1,
         GuaranteeBroker? Broker = null
     );
 
@@ -133,49 +134,6 @@ namespace EventSourcingPoc.API.Events
         decimal? AmountCoverage,
         decimal Price
     );
-
-    public record Evaluator(string Id, string Name);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement evaluation is requested, containing the reason for the evaluation request.
-    /// </summary>
-    /// <param name="Reason"></param>
-    public record GuaranteeEndorsementEvaluationRequested(string Reason);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement evaluation is approved, containing the reason for approval and the date of approval.
-    /// </summary>
-    /// <param name="Reason"></param>
-    /// <param name="ApprovalDate"></param>
-    public record GuaranteeEndorsementEvaluationApproved(string Reason, DateTime ApprovalDate, Evaluator Evaluator);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement evaluation is rejected, containing the reason for rejection and the date of rejection.
-    /// </summary>
-    /// <param name="Reason"></param>
-    /// <param name="RejectionDate"></param>
-    public record GuaranteeEndorsementEvaluationRejected(string Reason, DateTime RejectionDate, Evaluator Evaluator);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement is abandoned, containing the reason for abandonment and the date of abandonment.
-    /// </summary>
-    /// <param name="Reason"></param>
-    /// <param name="AbandonmentDate"></param>
-    public record GuaranteeEndorsementAbandoned(string Reason, DateTime AbandonmentDate);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement payment is confirmed, containing the amount paid and the date of payment.
-    /// </summary>
-    /// <param name="PaidAmount"></param>
-    /// <param name="PaidDate"></param>
-    public record GuaranteeEndorsementPaymentConfirmed(decimal PaidAmount, DateTime PaidDate);
-
-    /// <summary>
-    /// Event triggered when a guarantee endorsement is issued, containing the issue date and the endorsement number for the issued endorsement.
-    /// </summary>
-    /// <param name="IssueDate"></param>
-    /// <param name="EndorsementNumber"></param>
-    public record GuaranteeEndorsementIssued(DateTime IssueDate, string EndorsementNumber);
 
     /// <summary>
     /// Event triggered when a guarantee information is updated, containing the updated tender ID and gloss for the guarantee.
