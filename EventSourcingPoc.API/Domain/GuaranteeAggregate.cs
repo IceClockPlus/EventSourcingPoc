@@ -1,4 +1,5 @@
 ﻿using EventSourcingPoc.API.Events;
+using EventSourcingPoc.API.Events.Guarantees;
 using ImTools;
 using System.Globalization;
 using System.Reflection;
@@ -87,7 +88,7 @@ namespace EventSourcingPoc.API.Domain
             );
             Broker = @event.Broker != null ? new GuaranteeBroker(@event.Broker.Id, @event.Broker.Name) : null;
             AmountCoverage = @event.InitialAmountCoverage;
-            Version = 1;
+            Version = @event.Version;
         }
 
         public void Apply(GuaranteeInformationUpdated @event)
@@ -133,6 +134,59 @@ namespace EventSourcingPoc.API.Domain
         {
             Status = GuaranteeStatus.Issued;
             Code = new GuaranteeCode(@event.CertificateNumber, @event.Code);
+        }
+
+        /// <summary>
+        /// Applies the changes from the EndorsementApplied event to the GuaranteeAggregate. This method updates the relevant properties of the aggregate based on the changes specified in the event, such as gloss, end date, supplier information, and beneficiary information. It also increments the version of the aggregate to reflect the applied changes.
+        /// </summary>
+        /// <param name="event"></param>
+        public void Apply(EndorsementApplied @event)
+        {
+            if(@event.Changes.Gloss is not null)
+            {
+                Information = Information with
+                {
+                    Gloss = @event.Changes.Gloss
+                };
+            }
+
+            if(@event.Changes.EndDate is not null)
+            {
+                CurrentDateCoverage = CurrentDateCoverage with
+                {
+                    End = new DateTime(@event.Changes.EndDate.Value.Year, @event.Changes.EndDate.Value.Month, @event.Changes.EndDate.Value.Day)
+                };
+            }
+
+            if(@event.Changes.Supplier is not null)
+            {
+                Supplier = Supplier with
+                {
+                    Name = @event.Changes.Supplier.Name ?? Supplier.Name,
+                    Address = Supplier.Address with
+                    {
+                        Street = @event.Changes.Supplier.AddressStreet ?? Supplier.Address.Street,
+                        Location = @event.Changes.Supplier.AddressLocation ?? Supplier.Address.Location,
+                        Region = @event.Changes.Supplier.AddressRegion ?? Supplier.Address.Region,
+                    }
+                };
+            }
+
+            if(@event.Changes.Beneficiary is not null)
+            {
+                Beneficiary = Beneficiary with
+                {
+                    Name = @event.Changes.Beneficiary.Name ?? Beneficiary.Name,
+                    Address = Beneficiary.Address with
+                    {
+                        Street = @event.Changes.Beneficiary.AddressStreet ?? Beneficiary.Address.Street,
+                        Location = @event.Changes.Beneficiary.AddressLocation ?? Beneficiary.Address.Location,
+                        Region = @event.Changes.Beneficiary.AddressRegion ?? Beneficiary.Address.Region,
+                    }
+                };
+            }
+
+            Version++;
         }
     }
     
