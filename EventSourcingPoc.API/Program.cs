@@ -6,6 +6,7 @@ using Marten;
 using Marten.Events.Aggregation;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Polecat;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,6 +49,13 @@ builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
 builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Add Polecat
+builder.Services.AddPolecat(options =>
+{
+    options.Connection(builder.Configuration.GetConnectionString("DbPersistence") ?? throw new ArgumentNullException());
+    
+});
 
 // Add Marten 
 builder.Services.AddMarten(options =>

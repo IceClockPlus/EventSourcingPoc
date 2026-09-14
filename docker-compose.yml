@@ -1,4 +1,16 @@
 services:
+  sqlserver2025:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: sqlserver_2025
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD}
+      - MSSQL_PID=Developer
+    port:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    restart: unless-stopped
   postgres-db:
     image: postgres:16-alpine
     container_name: postgres_db
