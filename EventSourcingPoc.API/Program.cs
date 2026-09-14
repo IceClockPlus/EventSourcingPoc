@@ -6,6 +6,7 @@ using Marten;
 using Marten.Events.Aggregation;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Polecat;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,12 +28,34 @@ builder.Services.AddScoped<IBrokerService, BrokerService>();
 builder.Services.AddScoped<IInsuranceService, InsuranceService>();
 builder.Services.AddScoped<IBondsService, BondsService>();
 
+
+// Scan all the command and query handlers in the assembly and register them as scoped services
+builder.Services.Scan(scan => 
+    scan.FromAssemblyOf<Program>()
+    .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime()
+    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime()
+    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+        .AsImplementedInterfaces()
+        .WithScopedLifetime()
+);
+
 builder.Services.AddScoped<CreateGuaranteeHandler>();
 builder.Services.AddScoped<IssueGuaranteeHandler>();
 builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
 builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
 builder.Services.AddSingleton(TimeProvider.System);
+
+// Add Polecat
+builder.Services.AddPolecat(options =>
+{
+    options.Connection(builder.Configuration.GetConnectionString("DbPersistence") ?? throw new ArgumentNullException());
+    
+});
 
 // Add Marten 
 builder.Services.AddMarten(options =>

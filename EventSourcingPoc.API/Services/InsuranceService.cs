@@ -6,7 +6,7 @@ namespace EventSourcingPoc.API.Services
     public class InsuranceInfo
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
         public int? LegacyId { get; set; }
         public long CurrentNumberCounter { get; set; }
     }
