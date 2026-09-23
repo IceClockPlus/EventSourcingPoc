@@ -43,33 +43,28 @@ builder.Services.Scan(scan =>
         .WithScopedLifetime()
 );
 
+builder.Services.AddDbContext<GuaranteeContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbPersistence")));
+
+// Recover AUTOMATIC_MIGRATION from environment variable, default to true if not set
+var automaticMigration = builder.Configuration.GetValue<bool?>("AUTOMATIC_MIGRATION") ?? true;
+
+// Apply migrations automatically if AUTOMATIC_MIGRATION is true
+if (automaticMigration)
+{
+    using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<GuaranteeContext>();
+        dbContext.Database.Migrate();
+    }    
+}
+
 builder.Services.AddScoped<CreateGuaranteeHandler>();
 builder.Services.AddScoped<IssueGuaranteeHandler>();
 builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
 builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
 builder.Services.AddSingleton(TimeProvider.System);
-
-// Add Polecat
-builder.Services.AddPolecat(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("DbPersistence") ?? throw new ArgumentNullException());
-    
-});
-
-// Add Marten 
-builder.Services.AddMarten(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("Marten") ?? throw new ArgumentNullException());
-    options.Projections.Add<GuaranteeClientProjection>(JasperFx.Events.Projections.ProjectionLifecycle.Async);
-}).AddAsyncDaemon(JasperFx.Events.Daemon.DaemonMode.HotCold);
-
-builder.Services.AddDbContext<GuaranteeContext>(opt =>
-{
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("Marten"), 
-        npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("ef_migrations_history"))
-    .UseSnakeCaseNamingConvention();
-});
 
 
 builder.Services.AddControllers();

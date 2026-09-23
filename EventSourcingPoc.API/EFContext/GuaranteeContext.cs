@@ -9,6 +9,7 @@ namespace EventSourcingPoc.API.EFContext
         public DbSet<Insurance> Insurances { get; set; }
         public DbSet<Bond> Bonds { get; set; }
         public DbSet<Broker> Brokers { get; set; }
+        public DbSet<EventRecord> Events { get; set; }
         public GuaranteeContext(DbContextOptions<GuaranteeContext> options):base(options)
         {
                 
@@ -66,6 +67,19 @@ namespace EventSourcingPoc.API.EFContext
         {
             builder.HasKey(p => p.Id);
             builder.Property(p => p.Name).HasMaxLength(100);
+        }
+    }
+
+    public class EventRecordConfiguration : IEntityTypeConfiguration<EventRecord>
+    {
+        public void Configure(EntityTypeBuilder<EventRecord> builder)
+        {
+            builder.HasKey(p => p.GlobalSequence);
+            builder.Property(p => p.GlobalSequence).ValueGeneratedOnAdd();
+            builder.Property(p => p.EventType).HasMaxLength(200);
+            builder.Property(p => p.Data).IsRequired();
+            builder.Property(p => p.Timestamp).HasDefaultValueSql("SYSUTCDATETIME()");
+            builder.HasIndex(p => new { p.StreamId, p.Version }).IsUnique();
         }
     }
 }
