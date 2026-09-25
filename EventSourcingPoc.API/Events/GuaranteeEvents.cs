@@ -1,4 +1,5 @@
 ﻿using EventSourcingPoc.API.Domain;
+using EventSourcingPoc.API.EFContext;
 
 namespace EventSourcingPoc.API.Events
 {
@@ -28,6 +29,20 @@ namespace EventSourcingPoc.API.Events
         Money Price,
         GuaranteeBroker? Broker = null
     );
+
+    public record GuaranteeRegistered(
+        string TenderId,
+        string Gloss,
+        GuaranteeRequestBond Bond,
+        LegalPartyInfo Supplier,
+        LegalPartyInfo Beneficiary,
+        DateTime Start,
+        DateTime End,
+        decimal Amount,
+        string Currency,
+        decimal Price,
+        GuaranteeBroker? Broker = null
+    ) : IDomainEvent;
 
     public record GuaranteeRequestBond(int Id, string Name);
 

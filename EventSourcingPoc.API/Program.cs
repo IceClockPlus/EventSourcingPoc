@@ -32,13 +32,22 @@ builder.Services.AddScoped<IBondsService, BondsService>();
 // Scan all the command and query handlers in the assembly and register them as scoped services
 builder.Services.Scan(scan => 
     scan.FromAssemblyOf<Program>()
-    .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(IQueryHandler<,>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
-    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(ICommandHandler<>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
-    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(ICommandHandler<,>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
 );
@@ -46,8 +55,8 @@ builder.Services.Scan(scan =>
 builder.Services.AddDbContext<GuaranteeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbPersistence")));
 
-// Recover AUTOMATIC_MIGRATION from environment variable, default to true if not set
-var automaticMigration = builder.Configuration.GetValue<bool?>("AUTOMATIC_MIGRATION") ?? true;
+// Recover AUTOMATIC_MIGRATION from environment variable, default to false if not set
+var automaticMigration = builder.Configuration.GetValue<bool?>("AUTOMATIC_MIGRATION") ?? false;
 
 // Apply migrations automatically if AUTOMATIC_MIGRATION is true
 if (automaticMigration)
@@ -59,13 +68,13 @@ if (automaticMigration)
     }    
 }
 
-builder.Services.AddScoped<CreateGuaranteeHandler>();
-builder.Services.AddScoped<IssueGuaranteeHandler>();
-builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
-builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
 
 builder.Services.AddSingleton(TimeProvider.System);
 
+builder.Services.AddSingleton<EventTypeMap>();
+builder.Services.AddScoped<EventStore>();
+builder.Services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+builder.Services.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
