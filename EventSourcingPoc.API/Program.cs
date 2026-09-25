@@ -32,45 +32,49 @@ builder.Services.AddScoped<IBondsService, BondsService>();
 // Scan all the command and query handlers in the assembly and register them as scoped services
 builder.Services.Scan(scan => 
     scan.FromAssemblyOf<Program>()
-    .AddClasses(c => c.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(IQueryHandler<,>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
-    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(ICommandHandler<>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
-    .AddClasses(c => c.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+    .AddClasses(c => c
+            .AssignableTo(typeof(ICommandHandler<,>))
+            .Where(type => !type.ContainsGenericParameters)
+        , publicOnly: false)
         .AsImplementedInterfaces()
         .WithScopedLifetime()
 );
 
-builder.Services.AddScoped<CreateGuaranteeHandler>();
-builder.Services.AddScoped<IssueGuaranteeHandler>();
-builder.Services.AddScoped<ConfirmGuaranteePriceHandler>();
-builder.Services.AddScoped<UpdateGuaranteeInformationHandler>();
+builder.Services.AddDbContext<GuaranteeContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbPersistence")));
+
+// Recover AUTOMATIC_MIGRATION from environment variable, default to false if not set
+var automaticMigration = builder.Configuration.GetValue<bool?>("AUTOMATIC_MIGRATION") ?? false;
+
+// Apply migrations automatically if AUTOMATIC_MIGRATION is true
+if (automaticMigration)
+{
+    using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<GuaranteeContext>();
+        dbContext.Database.Migrate();
+    }    
+}
+
 
 builder.Services.AddSingleton(TimeProvider.System);
 
-// Add Polecat
-builder.Services.AddPolecat(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("DbPersistence") ?? throw new ArgumentNullException());
-    
-});
-
-// Add Marten 
-builder.Services.AddMarten(options =>
-{
-    options.Connection(builder.Configuration.GetConnectionString("Marten") ?? throw new ArgumentNullException());
-    options.Projections.Add<GuaranteeClientProjection>(JasperFx.Events.Projections.ProjectionLifecycle.Async);
-}).AddAsyncDaemon(JasperFx.Events.Daemon.DaemonMode.HotCold);
-
-builder.Services.AddDbContext<GuaranteeContext>(opt =>
-{
-    opt.UseNpgsql(builder.Configuration.GetConnectionString("Marten"), 
-        npgsqlOptions => npgsqlOptions.MigrationsHistoryTable("ef_migrations_history"))
-    .UseSnakeCaseNamingConvention();
-});
-
+builder.Services.AddSingleton<EventTypeMap>();
+builder.Services.AddScoped<EventStore>();
+builder.Services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+builder.Services.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
