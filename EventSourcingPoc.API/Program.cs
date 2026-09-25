@@ -52,8 +52,27 @@ builder.Services.Scan(scan =>
         .WithScopedLifetime()
 );
 
-builder.Services.AddDbContext<GuaranteeContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbPersistence")));
+
+string eventStoreConnectionString = builder.Configuration.GetConnectionString("EventStore") ?? throw new InvalidOperationException("EventStore connection string is not configured.");
+
+builder.Services.AddDbContext<EventStoreContext>(options =>
+    options.UseSqlServer(eventStoreConnectionString, sqlOptions => 
+    {
+        sqlOptions.EnableRetryOnFailure();
+    }));
+
+
+string dbReadConnectionString = builder.Configuration.GetConnectionString("ReadModel") ?? throw new InvalidOperationException("ReadModel connection string is not configured.");
+
+builder.Services.AddDbContext<ProjectionContext>(options =>
+{
+    options.UseSqlServer(dbReadConnectionString, sqlOptions => 
+    {
+        sqlOptions.EnableRetryOnFailure();
+    });
+
+});
+
 
 // Recover AUTOMATIC_MIGRATION from environment variable, default to false if not set
 var automaticMigration = builder.Configuration.GetValue<bool?>("AUTOMATIC_MIGRATION") ?? false;
@@ -63,8 +82,11 @@ if (automaticMigration)
 {
     using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     {
-        var dbContext = scope.ServiceProvider.GetRequiredService<GuaranteeContext>();
-        dbContext.Database.Migrate();
+        var eventStoreDbContext = scope.ServiceProvider.GetRequiredService<EventStoreContext>();
+        eventStoreDbContext.Database.Migrate();
+
+        var readModelDbContext = scope.ServiceProvider.GetRequiredService<ProjectionContext>();
+        readModelDbContext.Database.Migrate();
     }    
 }
 

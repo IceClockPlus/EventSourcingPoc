@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace EventSourcingPoc.API.Migrations
+namespace EventSourcingPoc.API.Migrations.EventsDb
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class InitialEvents : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,6 +36,18 @@ namespace EventSourcingPoc.API.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Brokers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CustomerLookups",
+                columns: table => new
+                {
+                    TaxId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    StreamId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CustomerLookups", x => x.TaxId);
                 });
 
             migrationBuilder.CreateTable(
@@ -89,6 +101,9 @@ namespace EventSourcingPoc.API.Migrations
 
             migrationBuilder.DropTable(
                 name: "Brokers");
+
+            migrationBuilder.DropTable(
+                name: "CustomerLookups");
 
             migrationBuilder.DropTable(
                 name: "Events");

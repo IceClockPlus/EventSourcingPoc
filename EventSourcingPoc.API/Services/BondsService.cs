@@ -19,8 +19,8 @@ namespace EventSourcingPoc.API.Services
 
     public class BondsService : IBondsService
     {
-        private readonly GuaranteeContext _context;
-        public BondsService(GuaranteeContext guaranteeContext)
+        private readonly EventStoreContext _context;
+        public BondsService(EventStoreContext guaranteeContext)
         {
             _context = guaranteeContext;
         }

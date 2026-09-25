@@ -15,9 +15,9 @@ namespace EventSourcingPoc.API.Services
         Task<IReadOnlyList<BrokerInfo>> GetBrokerInfoAsync(CancellationToken cancellationToken);
     }
 
-    public class BrokerService(GuaranteeContext context) : IBrokerService
+    public class BrokerService(EventStoreContext context) : IBrokerService
     {
-        private readonly GuaranteeContext _context = context;
+        private readonly EventStoreContext _context = context;
         public async Task<BrokerInfo?> GetBrokerInfoAsync(int id, CancellationToken cancellationToken)
         {
             var broker = await _context.Brokers.AsNoTracking()

@@ -6,7 +6,7 @@ namespace EventSourcingPoc.API.EFContext
 {
     public interface IDomainEvent{}
 
-    public class EventStore(GuaranteeContext db, EventTypeMap eventTypeMap)
+    public class EventStore(EventStoreContext db, EventTypeMap eventTypeMap)
     {
         public async Task AppendAsync(Guid streamId, int expectedVersion, IReadOnlyList<IDomainEvent> events, CancellationToken ct)
         {

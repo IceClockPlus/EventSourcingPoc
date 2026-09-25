@@ -12,10 +12,12 @@ namespace EventSourcingPoc.API.Handlers
     internal sealed class RegisterCustomerCommandHandler : ICommandHandler<RegisterCustomeCommand>
     {
         private readonly EventStore _eventStore;
+        private readonly ILogger<RegisterCustomerCommandHandler> _logger;
 
-        public RegisterCustomerCommandHandler(EventStore eventStore)
+        public RegisterCustomerCommandHandler(EventStore eventStore, ILogger<RegisterCustomerCommandHandler> logger)
         {
             _eventStore = eventStore;
+            _logger = logger;
         }
 
         public async Task<Result> Handle(RegisterCustomeCommand command, CancellationToken cancellationToken)
@@ -24,7 +26,7 @@ namespace EventSourcingPoc.API.Handlers
             var customer = Customer.Register(customerId, command.TaxId, command.Name);
 
             await _eventStore.AppendAsync(customerId, customer.Version, customer.DequeueUncommittedEvents(), cancellationToken);
-
+            _logger.LogInformation("Customer registered with ID: {CustomerId}", customerId);
             return Result.Success();
         }
     }

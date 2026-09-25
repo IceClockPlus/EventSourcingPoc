@@ -18,9 +18,9 @@ namespace EventSourcingPoc.API.Services
         Task<long> GenerateNewCertificateNumber(int id, CancellationToken cancellationToken);
     }
 
-    public class InsuranceService(GuaranteeContext context) : IInsuranceService
+    public class InsuranceService(EventStoreContext context) : IInsuranceService
     {
-        private readonly GuaranteeContext _context = context;
+        private readonly EventStoreContext _context = context;
         public async Task<InsuranceInfo?> GetInsurance(int id, CancellationToken cancellationToken)
         {
             var insurance = await _context.Insurances

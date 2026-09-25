@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace EventSourcingPoc.API.Migrations
+namespace EventSourcingPoc.API.Migrations.EventsDb
 {
-    [DbContext(typeof(GuaranteeContext))]
-    [Migration("20260923153923_InitialMigration")]
-    partial class InitialMigration
+    [DbContext(typeof(EventStoreContext))]
+    [Migration("20260925162330_InitialEvents")]
+    partial class InitialEvents
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,6 +61,19 @@ namespace EventSourcingPoc.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Brokers");
+                });
+
+            modelBuilder.Entity("EventSourcingPoc.API.EFContext.CustomerLookupModel", b =>
+                {
+                    b.Property<string>("TaxId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("StreamId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("TaxId");
+
+                    b.ToTable("CustomerLookups");
                 });
 
             modelBuilder.Entity("EventSourcingPoc.API.EFContext.EventRecord", b =>

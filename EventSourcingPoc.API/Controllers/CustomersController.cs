@@ -5,14 +5,9 @@ namespace EventSourcingPoc.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CustomersController : ControllerBase
+    public class CustomersController(ICommandDispatcher commands) : ControllerBase
     {
-        private readonly ICommandDispatcher _commands;
-
-        public CustomersController(ICommandDispatcher commands)
-        {
-            _commands = commands;
-        }
+        private readonly ICommandDispatcher _commands = commands;
 
         [HttpPost]
         public async Task<IActionResult> RegisterCustomer([FromBody] Contracts.RegisterCustomerPayload payload, CancellationToken cancellationToken)
